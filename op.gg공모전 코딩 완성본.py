@@ -12,7 +12,7 @@ import pandas as pd
 import time
 
 
-api_key = 'RGAPI-ac0f4fe8-87c6-42e8-8465-33951daa26cf'
+api_key = ''
 
 
 sohwan = "https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/" +'미드 아트록스' +'?api_key=' + api_key
