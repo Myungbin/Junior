@@ -1,0 +1,88 @@
+---
+title: "LEAGUE OF LEGEND"
+author: "TEAM Maginot Line"
+date: '2021.01.29'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(jsonlite)
+library(httr)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+```
+
+#아이템데이터
+```{r}
+itemname <- read_xlsx("itemname.xlsx")
+```
+
+## 아트록스 매치 상대데이터
+```{r}
+#상대 데이터
+match <- read_xlsx("match.xlsx")
+
+match1 <- data.frame(match$win, match$item0)
+match2 <- data.frame(match$win,match$item1)
+match3 <- data.frame(match$win,match$item2)
+match4 <- data.frame(match$win,match$item3)
+match5 <- data.frame(match$win,match$item4)
+match6 <- data.frame(match$win,match$item5)
+colnames(match1)= c("win", "item")
+colnames(match2)= c("win", "item")
+colnames(match3)= c("win", "item")
+colnames(match4)= c("win", "item")
+colnames(match5)= c("win", "item")
+colnames(match6)= c("win", "item")
+
+
+match7 <- rbind(match1,match2,match3,match4,match5,match6)
+```
+
+
+
+```{r}
+awinrate <- match7[match7$win == "TRUE" ,]
+
+awinitem0 <- table(awinrate$item)
+
+awinitem0 <- sort(awinitem0, decreasing = TRUE)
+
+awindf0 <- data.frame(awinitem0)
+
+names(awindf0) = c("code", "winfreq")
+
+awinfreq0 <- merge(awindf0, itemname)
+
+awinfreq0 <- awinfreq0 %>% filter(winfreq >= 10)
+
+```
+
+
+```{r}
+aloserate <- match7[match7$win == "FALSE" ,]
+
+aloseitem0 <- table(aloserate$item)
+
+aloseitem0 <- sort(aloseitem0, decreasing = TRUE)
+
+alosedf0 <- data.frame(aloseitem0)
+
+names(alosedf0) = c("code", "losefreq")
+
+alosefreq0 <- merge(alosedf0, itemname)
+
+alosefreq0 <- alosefreq0 %>% filter(losefreq >= 10)
+```
+
+#end
+```{r}
+aitemwinrate0 <- merge(awinfreq0, alosefreq0)
+
+aitemwinrate0$winrate <- aitemwinrate0$winfreq/(aitemwinrate0$winfreq+aitemwinrate0$losefreq)
+
+View(aitemwinrate0)
+```
