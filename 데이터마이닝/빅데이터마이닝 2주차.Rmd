@@ -1,0 +1,236 @@
+---
+title: "빅데이터마이닝"
+author: "곽명빈"
+date: '2021 9 9 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+### 데이터 정의
+```{r}
+dat <- read.csv('REM_고객예측_의사결정_데이터.csv')
+
+# 데이터 살펴보기
+
+head(df)
+
+str(df)
+
+sum(is.na(df))
+
+```
+# 데이터 전처리
+```{r}
+library(dplyr)
+
+# 필요한 col
+
+df <- dat %>% select("구입시간", "구입갯수", "가격", "성별", "지역1")
+
+# 지출비용 col
+
+df <- data.frame(df, 지출비용 = df$가격*df$구입갯수)
+
+# 성별 지출비용
+
+mat <- table(df$성별)
+
+b <- barplot(table(df$성별))
+text(x = b, y = mean(mat), labels = mat)
+
+male_cost <- df[df$성별 == "남성", "지출비용"]
+female_cost <- df[df$성별 == "여성", "지출비용"]
+
+plot(male_cost)
+
+plot(female_cost)
+
+mean(male_cost); mean(female_cost)
+var(male_cost); var(female_cost)
+quantile(male_cost)
+quantile(male_cost, probs = c(0.05, 0.1, 0.9, 0.95))
+
+aggregate(지출비용~ 성별, df, mean)
+
+summary(male_cost)
+
+# install.packages(doBy)
+library(doBy)
+
+
+
+```
+
+## 히스토그램
+```{r}
+
+hist_male <- hist(male_cost)
+
+hist_female <- hist(female_cost)
+
+#plot(hist_male, col = adjustcolor("blue", alpha = 0.5), main = "성별 지출비용", xlab = "지출비용"))
+#plot(hist_female, col = adjustcolor("red", alpha = 0.5),add = TRUE))
+```
+
+```{r}
+
+boxplot(male_cost)
+
+boxplot(female_cost)
+
+boxplot(male_cost)$stats
+
+male <- ifelse(male_cost < 10 | male_cost >14500, NA, male_cost)
+
+boxplot(male)
+
+female <- ifelse(female_cost < 200 | male_cost >75000, NA, male_cost)
+
+boxplot(female)
+
+boxplot(지출비용 ~ 성별, df, main = "성별 지출비용", xlab = "")
+```
+
+## 시간대별
+
+```{r}
+
+df$group_time <- ifelse(df$구입시간 <= 600, "새벽",
+                        ifelse(df$구입시간 <= 1200, "아침",
+                               ifelse(df$구입시간 <= 1800, "오후", "저녁")))
+
+
+summary(df[df$group_time == "새벽", ])
+summary(df[df$group_time == "아침", ])
+summary(df[df$group_time == "오후", ])
+summary(df[df$group_time == "저녁", ])
+
+```
+## 시간대비율
+```{r}
+a <- table(df$group_time)
+
+barplot(a)
+
+```
+
+## 시간대별 나누기 (성별)
+
+```{r}
+da_cost <- df[df$group_time == "새벽", "지출비용"]
+mo_cost <- df[df$group_time == "아침", "지출비용"]
+af_cost <- df[df$group_time == "오후", "지출비용"]
+ev_cost <- df[df$group_time == "저녁", "지출비용"]
+
+aggregate(지출비용 ~ group_time, df ,mean)
+aggregate(지출비용 ~ group_time, df ,median)
+aggregate(지출비용 ~ group_time, df ,var)
+```
+
+## 히스토그램
+```{r}
+par(mfrow = c(2,2))
+
+hist(da_cost)
+
+hist(mo_cost)
+
+```
+## 박스 plot
+```{r}
+par(mfrow = c(1,1))
+
+boxplot(da_cost)
+
+
+new_dat <- df[df$지출비용<20000,]
+
+boxplot(new_dat[new_dat$group_time == "새벽", "지출비용"])
+```
+## 지역별
+```{r}
+
+b <- table(df$지역1)
+
+barplot(b)
+
+sort(b)
+
+a <- df %>% filter(지역1 == '서울특별시' | 지역1 == '경기' | 지역1 == '경상남도' | 지역1 == '대구광역시')
+
+
+da_cost <- a[a$지역1 == "서울특별시", "지출비용"]
+mo_cost <- a[a$지역1 == "경기", "지출비용"]
+af_cost <- a[a$지역1 == "경상남도", "지출비용"]
+ev_cost <- a[a$지역1 == "대구광역시", "지출비용"]
+
+par(mfrow = c(2,2))
+
+hist(da_cost)
+
+hist(mo_cost)
+
+hist(af_cost)
+
+hist(ev_cost)
+
+```
+
+```{r}
+a1 <- df[df$지역1 == "강원" | df$지역1 == "강원도", "지출비용"]
+a2 <- df[df$지역1 == "경기도" | df$지역1 == "경기", "지출비용"]
+a3 <- df[df$지역1 == "서울시" | df$지역1 == "서울특별시", "지출비용"]
+a4 <- df[df$지역1 == "전라남도" | df$지역1 == "전남", "지출비용"]
+a5 <- df[df$지역1 == "경상남도" | df$지역1 == "경남", "지출비용"]
+a6 <- df[df$지역1 == "충청남도" | df$지역1 == "충남", "지출비용"]
+
+
+par(mfrow = c(2,3))
+
+hist(a1, main = "강원도", xlab = "지출비용")
+hist(a2, main = "경기도", xlab = "지출비용")
+hist(a3, main = "서울", xlab = "지출비용")
+hist(a4, main = "전라남도", xlab = "지출비용")
+hist(a5, main = "경상남도", xlab = "지출비용")
+hist(a6, main = "충청남도", xlab = "지출비용")
+
+par(mfrow = c(1,1))
+
+boxplot(a1)
+points(mean(a1), col = "red", pch = 15, position = "right")
+
+
+box = function(value){
+  boxplot(value, ylab = "지출비용")
+  points(mean(value), col = "red", pch = 15, position = "right")
+}
+
+par(mfrow = c(2,3))
+box(a1)
+box(a2)
+box(a3)
+box(a4)
+box(a5)
+box(a6)
+```
+
+```{r}
+# 귀무가설 : 정규분포를 따른다
+# 대립가설 : 정규분포를 따르지 않는다
+
+# 정규성 검정
+shapiro.test(male_cost)
+shapiro.test(female_cost)
+
+
+wilcox.test(male_cost, female_cost)
+t.test(male_cost, female_cost)
+
+
+
+```
+
