@@ -1,0 +1,179 @@
+---
+title: "패턴탐색 3주차 실습 "
+author: "곽명빈"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+library(party)
+```
+
+```{r}
+df <- iris
+
+head(df)
+
+str(df)
+
+# 결측치 
+sum(is.na(df))
+```
+```{r}
+# 기초 통계량
+summary(df)
+```
+```{r}
+# 데이터 분포
+plot(df)
+
+plot(df[,1:4])
+```
+
+```{r}
+# base plot
+plot(df$Sepal.Length, df$Sepal.Width)
+
+plot(df$Sepal.Length, df$Sepal.Width, col = c('red', 'blue', 'green'))
+
+plot(df$Sepal.Length, df$Sepal.Width, col = c('red', 'blue', 'green')[df$Species])
+
+plot(df$Sepal.Length, df$Sepal.Width, col = rainbow(3)[df$Species])
+
+plot(df$Petal.Length, df$Petal.Width, col = rainbow(3)[df$Species])
+
+```
+```{r}
+# plot 옵션
+
+plot(df$Sepal.Length, df$Sepal.Width, col = rainbow(3)[df$Species], pch = c(15,16,17), cex = 0.5, xlab = 'sepal.length',
+     ylab = 'sepal.width', legend = levels(df$Species))
+
+
+plot(df$Petal.Length, df$Petal.Width, col = rainbow(3)[df$Species], pch = c(15,16,17), cex = 0.5)
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(df, aes(x = df$Sepal.Length, y = df$Sepal.Width, color = df$Species)) + geom_point() + ggtitle("sp")
+
+ggplot(df, aes(x = df$Petal.Length, y = df$Petal.Width, color = df$Species)) + geom_point() + ggtitle("pe")
+```
+
+```{r}
+# 히스토그램
+
+hist(df$Sepal.Length)
+
+hist(df$Sepal.Length, probability = T)
+lines(density(df$Sepal.Length))
+```
+
+```{r}
+# 그룹별로
+sc <- df[df$Species == "setosa", "Petal.Length"]
+ver <- df[df$Species == "versicolor", "Petal.Length"]
+vir <- df[df$Species == "virginica", "Petal.Length"]
+
+hist(sc)
+```
+
+```{r}
+ggplot(df, aes(x =Sepal.Length)) + geom_histogram() + facet_grid(df$Species~.)
+
+ggplot(df, aes(x =Sepal.Length)) + geom_histogram() + facet_grid(df$Species~., scales = "free")
+
+ggplot(df, aes(x =Sepal.Length, fill = df$Species)) + geom_histogram(color = "black") + facet_grid(df$Species~., scales = "free")
+
+hi <- ggplot(df, aes(x = df$Sepal.Width, fill = df$Species)) + 
+  geom_histogram(alpha = 0.5, color = "black")
+
+hi + geom_histogram(alpha = 0.5, color = "black") + ggtitle("hisrogram")
+
+ggplot(df, aes(x = df$Sepal.Width, color = df$Species)) + geom_density()
+
+```
+
+```{r}
+ggplot(df, aes(x =df$Petal.Length, fill = df$Species)) + geom_histogram(color = "black") + 
+  facet_grid(df$Species~., scales = "free")
+
+ggplot(df, aes(x = df$Petal.Width, color = df$Species)) + geom_density()
+
+```
+
+```{r}
+# boxplot
+
+boxplot(df$Sepal.Length ~ df$Species)
+
+boxplot(df$Sepal.Length ~ df$Species, col = rainbow(3)) # x축
+
+boxplot(df$Sepal.Length ~ df$Species, col = rainbow(3), horizontal = T) # y축
+
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot() + 
+  ggtitle("그룹별 sepal.length")
+
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot() + coord_flip() + 
+  ggtitle("그룹별 sepal.length")
+
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot() + coord_flip() + 
+  ggtitle("그룹별 sepal.length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+# 이상치 모양 변경
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot(outlier.colour = 'black') + coord_flip() + 
+  ggtitle("그룹별 sepal.length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot(outlier.colour = 'black') + 
+  ggtitle("그룹별 sepal.length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+ggplot(df, aes(x = df$Species, y= df$Sepal.Length, color = Species)) + geom_boxplot(outlier.shape = NA) + 
+  ggtitle("그룹별 sepal.length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+ggplot(df, aes(x = df$Species, y= df$Petal.Length, color = Species)) + geom_boxplot(outlier.colour = "gray") + 
+  ggtitle("그룹별 Petal.Length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+ggplot(df, aes(x = df$Species, y= df$Petal.Width, color = Species)) + geom_boxplot(outlier.colour = "gray") + 
+  ggtitle("그룹별 Petal.Length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+
+
+```
+```{r}
+library(gridExtra)
+
+a <- ggplot(df, aes(x = df$Species, y= df$Petal.Length, color = Species)) + geom_boxplot(outlier.colour = "gray") + 
+  ggtitle("그룹별 Petal.Length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+b <- ggplot(df, aes(x = df$Species, y= df$Petal.Width, color = Species)) + geom_boxplot(outlier.colour = "gray") + 
+  ggtitle("그룹별 Petal.Length") + stat_summary(fun.y = mean, geom = "point", size = 2)
+
+
+grid.arrange(a, b)
+```
+
+```{r}
+
+a <- ggplot(df, aes(x = df$Sepal.Length, color = Species)) + geom_histogram() + 
+  ggtitle("그룹별 Sepal.Length")
+
+b <- ggplot(df, aes(x = df$Sepal.Width, color = Species)) + geom_histogram() + 
+  ggtitle("그룹별 Sepal.Width")
+
+c <- ggplot(df, aes(x = df$Petal.Length, color = Species)) + geom_histogram() + 
+  ggtitle("그룹별 Petal.Length")
+
+d <- ggplot(df, aes(x = df$Petal.Width, color = Species)) + geom_histogram() + 
+  ggtitle("그룹별 Petal.Width")
+
+grid.arrange(a,b,c,d)
+
+```
+
