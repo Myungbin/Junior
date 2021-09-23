@@ -1,0 +1,155 @@
+---
+title: "패턴탐색 4주차"
+author: "곽명빈"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 데이터 불러오기
+```{r}
+df <- read.csv("REM_고객예측_의사결정_데이터1.csv")
+```
+
+# 상관성
+```{r}
+dat <- iris
+
+
+plot(dat[,1:4])
+plot(dat[c('Sepal.Width', 'Sepal.Length')])
+abline(lm(dat$Sepal.Width ~ dat$Sepal.Length))
+# 상관계수
+
+cor(dat$Sepal.Length, dat$Sepal.Width)
+
+cor(dat$Petal.Length, dat$Sepal.Length)
+
+# 
+cor(dat[,1:4])
+```
+```{r}
+cor.test(dat$Sepal.Length, dat$Sepal.Width)
+
+cor.test(dat$Petal.Length, dat$Petal.Width)
+
+```
+# ggplot 선형성
+```{r}
+library(ggplot2)
+
+ggplot(dat, aes(x = dat$Sepal.Length, y = dat$Petal.Length)) + geom_point() + geom_smooth(method = "lm")
+
+ggplot(dat, aes(x = Sepal.Length, y = Petal.Length)) + geom_point(aes(color = Species)) + geom_smooth(method = "lm") + facet_grid(~Species)
+
+```
+
+```{r}
+library(corrgram)
+
+corrgram(dat)
+
+corrgram(dat, upper.panel = panel.conf)
+
+corrgram(dat, lower.panel = panel.conf)
+```
+# corrplot
+```{r}
+library(corrplot)
+
+a <- cor(dat[,1:4])
+
+corrplot(a)
+
+corrplot(a, method = "number")
+
+corrplot(a, method = "pie")
+
+corrplot(a, type = "upper", method ="number")
+
+corrplot(a, type = "lower", method ="number")
+
+corrplot.mixed(a, lower = 'square')
+```
+
+```{r}
+# install.packages("GGally")
+library(GGally)
+
+ggpairs(dat, mapping = ggplot2::aes(color = Species))
+
+```
+
+# 상관관계 != 인과관계
+# 인과관계 : 원인과 결과 
+# 상관관계 : 두 변수간의 일정한 관계
+## 인과관계는 상관관계의 충분조건이다.
+## 인과관계를 위해서는 상관관계가 필요조건이다.
+## 인과관계는 상관관계 원인과 결과를 명확히 밝히지만, 상관관계만으로는 인과관계를 정확히 밝히지는 못한다.
+
+```{r}
+corrplot(a, method = "number")
+
+plot(dat$Sepal.Length, dat$Petal.Width)
+
+ggplot(dat, aes(x = Sepal.Length, y = Petal.Length)) + geom_point() + geom_smooth(method = "lm")
+
+```
+## 히트맵
+```{r}
+library(reshape2)
+## melt tidy format long format
+cor(a)
+
+a1 <- melt(cor(a))
+
+heat <- ggplot(data = a1, aes(x = Var1, y = Var2, fill = value))
+heat + geom_tile() + labs(x = "", y="") + scale_fill_gradient2(limits = c(-1, 1))
+```
+
+
+
+
+
+```{r}
+df <- read.csv("REM_고객예측_의사결정_데이터1.csv")
+
+head(df)
+
+str(df)
+```
+## 열이름 출력하기
+```{r}
+colnames(df)
+```
+```{r}
+names(df) <- c("ID", "DATE","TIME","NUM", "PRICE", "AGE", "GENDER", "REGION1", "REGION2","GDOOS")
+
+colnames(df)
+```
+
+```{r}
+library(dplyr)
+
+# rename(df, TIME = 구입시간) # 새로운변수명 = 기존변수명
+
+```
+
+```{r}
+#중복 행 삭제
+df
+
+nrow(df)
+
+nrow(unique(df))
+
+which(duplicated(df))
+
+a <- df[duplicated(df),]
+
+data <- unique((df))
+```
+
