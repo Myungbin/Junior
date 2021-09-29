@@ -1,26 +1,27 @@
 ---
-title: "통계적사고와이해"
+title: "통계적사고와이해02"
 author: "곽명빈"
 date: '2021 9 8 '
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ```{r}
-library(reshape)
+
+
+#--- 1) 2015년도 학력별 흉악 범죄자 구성비 ------------------------------------# 
+## 1. Kosis 데이터 불러오기 : 2015년 학력별 흉악 범죄자 
+## 1-1. 절대 경로 지정
+getwd()
+
+dat <- read.csv(file = paste0('Criminals Education Level_2015.csv'), 
+                header = FALSE, stringsAsFactors = F, encoding = 'CP949')
+
 ```
 
-```{r}
-dir <- 'C:/Users/kki96/OneDrive/Desktop/명빈 과제/21년 2학기/통계적사고와이해'
-dat <- read.csv(file = paste0(dir, '/Criminals Education Level_2015.csv'), 
-                header = FALSE, stringsAsFactors = F)
-
-```
 
 ```{r}
+## 2. 데이터 핸들링 
 dat2 <- dat
 
 colmns <- dat2[c(2:3), ]
@@ -32,67 +33,96 @@ criminal <- dat2[-c(1:3), ]
 names(criminal) <- colmns
 criminal
 
-re_criminal <- melt(criminal, id.vars = c('죄종별(1)', '죄종별(2)'))
-
-names(re_criminal)[names(re_criminal)=="variable"]="교육수준"
-names(re_criminal)[names(re_criminal)=="value"]="도수"
+library(reshape2)
+re_criminal <- melt(criminal, id.vars = c('죄종별(1)', '죄종별(2)'),
+                    variable.name = "교육수준", value.name = "도수")
 
 str(re_criminal)
 re_criminal$도수 <- as.numeric(re_criminal$도수)
-```
 
-
-```{r}
 ## 2-1. 핸들링한 데이터 저장
-write.csv(re_criminal, 're_Criminals Education Level_2015.csv', row.names = F)
+# write.csv(re_criminal, 're_Criminals Education Level_2015.csv', row.names = F, fileEncoding = 'UTF-8')
+
 
 ```
 
 ```{r}
 ## 3. 자료의 요약
 tapply(re_criminal$도수, re_criminal$교육수준, sum)
+
 tapply(re_criminal$도수, re_criminal$`죄종별(2)`, sum)
 
-with(re_criminal, tapply(도수, list(교육수준, `죄종별(2)`), sum))
+tapply(re_criminal$도수, list(re_criminal$교육수준, re_criminal$`죄종별(2)`), sum)
 
-```
 
-```{r}
 ## 3-1. 파생변수 생성 후, 교차테이블 확인
-`살인` <- grep('살인', unique(re_criminal$`죄종별(2)`), value = T)
-`성폭력` <- grep('강간|강제추행', unique(re_criminal$`죄종별(2)`), value = T)
-re_criminal$`죄명` <- ifelse(re_criminal$`죄종별(2)` %in% `살인`, '살인',
-                           ifelse(re_criminal$`죄종별(2)` %in% `성폭력`, '성폭력', re_criminal$`죄종별(2)`))
+homicide <- grep('살인', unique(re_criminal$`죄종별(2)`), value = T)
+sexual_violence <- grep('강간|강제추행', unique(re_criminal$`죄종별(2)`), value = T)
+re_criminal$`죄명` <- ifelse(re_criminal$`죄종별(2)` %in% homicide, '살인',
+                           ifelse(re_criminal$`죄종별(2)` %in% sexual_violence, '성폭력', re_criminal$`죄종별(2)`))
 
 
-`초등학교 이하` <- grep('불취학|초등학교', unique(re_criminal$`교육수준`), value = T)
-`중학교` <- grep('중학교', unique(re_criminal$`교육수준`), value = T)
-`고등학교` <- grep('고등학교', unique(re_criminal$`교육수준`), value = T)
-`대학교 이상` <- grep('대학', unique(re_criminal$`교육수준`), value = T)
+elementary_sc <- grep('불취학|초등학교', unique(re_criminal$`교육수준`), value = T)
+middle_sc <- grep('중학교', unique(re_criminal$`교육수준`), value = T)
+high_sc <- grep('고등학교', unique(re_criminal$`교육수준`), value = T)
+university <- grep('대학', unique(re_criminal$`교육수준`), value = T)
 
-re_criminal$`교육정도` <- ifelse(re_criminal$`교육수준` %in% `초등학교 이하`, '초등학교 이하',
-                           ifelse(re_criminal$`교육수준` %in% `중학교`, '중학교', 
-                                  ifelse(re_criminal$`교육수준` %in% `고등학교`, '고등학교',
-                                         ifelse(re_criminal$`교육수준` %in% `대학교 이상`, '대학교 이상', re_criminal$`교육수준`))))
+re_criminal$`교육정도` <- ifelse(re_criminal$`교육수준` %in% elementary_sc, '초등학교 이하',
+                           ifelse(re_criminal$`교육수준` %in% middle_sc, '중학교', 
+                                  ifelse(re_criminal$`교육수준` %in% high_sc, '고등학교', 
+                                         ifelse(re_criminal$`교육수준` %in% university, '대학교 이상', re_criminal$`교육수준`))))
 
 
-#with(re_criminal, tapply(도수, list(교육정도, 죄명), sum, na.rm = T))
+
 str(re_criminal)
+
 re_criminal$`죄명` <- factor(re_criminal$`죄명`, levels = c('살인', '강도', '방화', '성폭력'),
                             labels = c('살인', '강도', '방화', '성폭력'))
 re_criminal$`교육정도` <- factor(re_criminal$`교육정도`, 
                              levels = c('초등학교 이하', '중학교', '고등학교', '대학교 이상'),
                              labels = c('초등학교 이하', '중학교', '고등학교', '대학교 이상'))
 
-crim_edu_lv <- with(re_criminal, tapply(도수, list(교육정도, 죄명), sum, na.rm = T))
-#crim_edu_lv <- addmargins(crim_edu_lv, 2)
-addmargins(prop.table(addmargins(crim_edu_lv, 2), 1), 1)
 
+crim_edu_lv <- tapply(re_criminal$도수, list(re_criminal$교육정도, re_criminal$죄명), sum, na.rm = T)
+addmargins(prop.table(crim_edu_lv), margin = c(1,2))
+prop.table(addmargins(crim_edu_lv))
 
 
 ```
 
 ```{r}
+
+## 4. 유의성 검정 : 카이제곱 검정
+library(descr)
+CrossTable(crim_edu_lv, expected = TRUE)
+chi <- chisq.test(crim_edu_lv)
+
+chi$observed # 관측빈도
+chi$expected # 기대빈도
+
+
+## 1) 유의확률과 유의수준 비교
+# 귀무가설 H0: 교육수준과 범죄는 관령성이 없다
+# 대립가설 H1: 교육수준과 범죄는 관령성이 있다
+
+chi 
+# X-squared = 952.19, df = 9, p-value < 2.2e-16
+# 귀무가설을 기각하고 대립가설을 채택함
+
+##2) 검정통계량과 임계값 비교: 기각역안에 포함되므로 H0 기각 
+
+qchisq(p = 1 - 0.05, df = 9)
+# 16.91898
+
+
+## 4-1. 카이제곱 사후거정 => 범주가 3개 이상일 때 
+# install.packages("rcompanion")
+library(rcompanion)
+
+chisqpw <- pairwiseNominalIndependence(crim_edu_lv, compare = 'col', chisq = T, fisher = F)
+
+cldList(p.adj.Chisq ~ Comparison, chisqpw)
+
 #--- 2) 신약효과에 따른 통계적 연구의 사례 ------------------------------------#
 ## 1. 메트릭스 생성
 RCT <- matrix(c(600, 200, 400, 800), ncol = 2)
@@ -101,20 +131,27 @@ RCT
 dimnames(RCT) <- list(감기약투여여부 = c('감기약 투여', '감기약 투여하지 않음'),
                              감기완치 = c('완치됨', '완치되지 않음'))
 RCT
-addmargins(RCT)
 
-addmargins(RCT, 2)
-addmargins(prop.table(addmargins(RCT, 2), 1), 1)
+addmargins(RCT)
+addmargins(prop.table(RCT), margin = c(1,2))
 
 
 ## 2. 카이제곱 검정
 chi_res <- chisq.test(RCT)
+# X-squared = 331.67, df = 1, p-value < 2.2e-16
+# Yates' continuity correction (보정)
 chi_res$expected
 
-## 3. 피셔의 정확검정
+library(gmodels)
+CrossTable(RCT, chisq = T)
+
+
+## 3. 피셔의 정확검정 : 카이제곱 검정에서 기대 빈도 가정을 충족하지 않을때(기대빈도가 5 이하인 셀이 전체 셀의 20% 이상인 경우)
+
 fisher.test(RCT)
-```
 
+RCT2 <- matrix(c(6, 2, 4, 8), ncol = 2)
 
+chisq.test(RCT2)
 ```
 
