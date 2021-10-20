@@ -1,0 +1,152 @@
+---
+title: "빅데이터마이닝:패턴탐색"
+author: "데이터테크전공 20173204 곽명빈"
+date: '2021 10 19 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(knitr)
+library(tidyverse)
+library(tidyr)
+```
+
+```{r, echo = FALSE, out.width = "75%", fig.align = "left"}
+include_graphics("문제5.png")
+```
+
+
+```{r}
+# 데이터 읽기
+df <- read.csv('REM_고객예측_의사결정_데이터_중간고사.csv')
+
+# 1) 중복행을 제거하여 진행
+dat <- unique(df)
+str(dat)
+
+# 2) 지출비용 = 구입갯수 * 가격
+
+dat['지출비용'] = dat$구입갯수*dat$가격
+str(dat)
+
+# 3) 시간대를 하루 4그룹으로 나누어서 진행
+dat$group_time <- ifelse(dat$구입시간 <= 600, "새벽",
+                        ifelse(dat$구입시간 <= 1200, "아침",
+                              ifelse(dat$구입시간 <= 1800, "오후", "저녁")))
+
+# 4) 지역 1 칼럼에서 서울특별시 행만을 뽑아서 진행
+
+seoul <- filter(dat, 지역1 == '서울특별시') 
+
+# 5) 새벽시간대의  평균 지출 비용
+
+summary(seoul[seoul$group_time == '새벽',])  # summary 이용 
+
+aggregate(지출비용 ~ group_time ,seoul, mean) # aggregate
+
+
+## 서울지역 새벽시간대의 평균 지출비용 = 47575
+```
+
+```{r, echo = FALSE, out.width = "75%", fig.align = "left"}
+include_graphics("문제6.png")
+```
+```{r}
+library(corrplot)
+library(ggplot2)
+
+# iris 데이터 불러오기
+
+df <- iris
+
+str(df)
+
+# 데이터 분포
+plot(df[,1:4])
+
+# 상관계수 행렬
+iris_cor <- cor(df[,1:4])
+
+corrplot(iris_cor, method="number")
+
+# Sepal.Width 와 Sepal.Length 가 -0.12로 제일 낮은 것을 확인
+
+# 이상치 확인을 위해 Boxplot 이용
+boxplot(df$Sepal.Width)
+
+boxplot(df$Sepal.Length)
+
+boxplot(df$Sepal.Width)$stat  # 확인결과 2.2보다 낮고 4보다 높으면 이상치로 판단
+
+boxplot(df$Sepal.Length)$stat # 확인결과 4.3보다 낮고 7.9보다 높으면 이상치로 판단 -> 없음
+
+df$Sepal.Width<- ifelse(df$Sepal.Width < 2.2 | df$Sepal.Width > 4, NA, df$Sepal.Width) # 이상치를 Na로 바꾼후 제거
+
+# 4개의 이상치를 제거
+sum(is.na(df)) 
+
+na <- df %>% filter(!is.na(df$Sepal.Width)) 
+
+# 이상치 제거후 상관계수 -0.1231441
+cor(na$Sepal.Length, na$Sepal.Width)
+
+
+
+```
+```{r, echo = FALSE, out.width = "75%", fig.align = "left"}
+include_graphics("문제7.png")
+```
+```{r}
+# 식료품데이터
+library(arules)
+
+data("Groceries")
+
+dat <- Groceries
+
+summary(dat)
+
+inspect(dat[1:5])
+
+# itemFrequency
+itemFrequency(dat, type = "absolute") # 빈도수
+
+itemFrequencyPlot(dat, topN = 10)  # 상대도수 그래프
+
+# 연관규칙 (지지도0.005 신뢰도0.25이상인 것만 추출)
+rules <- apriori(dat, parameter = list(supp = 0.005, conf = 0.25))
+
+rules # 663개 
+
+# "yogurt" ,"margarine", "waffles"가 포함된 연관규칙
+
+rules_3 <- subset(rules, lhs %ain% c("yogurt" ,"margarine", "waffles"))
+
+rules_3 # 0개
+
+# 연관규칙 (지지도0.0005 신뢰도0.25이상인 것만 추출)
+rules <- apriori(dat, parameter = list(supp = 0.0005, conf = 0.25))
+
+rules # 95038개 
+
+# "yogurt" ,"margarine", "waffles"가 포함된 연관규칙
+
+rules_3 <- subset(rules, lhs %ain% c("yogurt" ,"margarine", "waffles"))
+
+rules_3 # 12개
+
+inspect(rules_3) # 8번째에 있는것을 확인
+
+inspect(rules_3[8])
+#    lhs                           rhs          support   confidence coverage   lift     count
+# {yogurt,margarine,waffles} => {whole milk} 0.0008134215 0.6153846  0.00132181 2.408399 8    
+# 지지도:0.0008134215 신뢰도:0.6153846 향상도:2.408399
+
+
+```
+
