@@ -1,0 +1,149 @@
+---
+title: '[통사이]중간고사'
+author: "곽명빈"
+date: '2021 10 20 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+df <- read.csv('book.csv')
+library(ggplot2)
+library(tidyverse)
+# (1) 책가격은 페이지수와 어떤 관계를 갖는지를 시각화하시오.
+
+ggplot(df, aes(x = Num.of.Pages, y = Book.Price, color = BookType)) + geom_point() + ggtitle("페이지수와 가격의 관계")
+
+summary(df)
+
+sd(df$Num.of.Pages)
+
+sd(df$Book.Price)
+
+cor(df$Num.of.Pages, df$Book.Price)
+
+Hard <- filter(df, BookType == "Hardcover")
+
+summary(Hard)
+
+Paper <- filter(df, BookType == "Paperback")
+
+summary(Paper)
+```
+
+```{r}
+library(ggplot2)
+library(reprex)
+A <- read.csv("A사.CSV")
+
+B <- read.csv("B사.CSV")
+
+## A사 
+summary(A)
+sd(A$연봉)
+
+A_n <- A[1:4, ]
+
+mean(A_n$연령)
+mean(A_n$연봉)
+
+A_n[nrow(A_n)+1,] <- c("A직원평균", mean(A_n$연령), mean(A_n$연봉))
+
+## B사
+summary(B)
+sd(B$연봉)
+
+B_n <- B[1:4, ]
+
+mean(B_n$연령)
+mean(B_n$연봉)
+
+B_n[nrow(B_n)+1,] <- c("B직원평균", mean(B_n$연령), mean(B_n$연봉))
+
+
+
+all <- rbind(A_n, B_n)
+
+ggplot(all, aes(직원, 연봉)) + geom_bar(stat = "identity", fill = "skyblue")
+
+
+```
+
+```{r}
+
+reprex({
+  
+  setwd('C:/Users/kki96/OneDrive/Desktop/명빈 과제/21년 2학기/통계적사고와이해/과제') 
+  library(ggplot2)
+library(reprex)
+A <- read.csv("A사.CSV")
+
+B <- read.csv("B사.CSV")
+
+## A사 
+summary(A)
+sd(A$연봉)
+
+A_n <- A[1:4, ]
+
+mean(A_n$연령)
+mean(A_n$연봉)
+
+A_n[nrow(A_n)+1,] <- c("A직원평균", mean(A_n$연령), mean(A_n$연봉))
+
+## B사
+summary(B)
+sd(B$연봉)
+
+B_n <- B[1:4, ]
+
+mean(B_n$연령)
+mean(B_n$연봉)
+
+B_n[nrow(B_n)+1,] <- c("B직원평균", mean(B_n$연령), mean(B_n$연봉))
+
+all <- rbind(A_n, B_n)
+all
+})
+
+
+```
+
+```{r}
+#--- 2) 신약효과에 따른 통계적 연구의 사례 ------------------------------------#
+## 1. 메트릭스 생성
+mat <- matrix(c(30, 70, 100, 60, 40, 100), ncol = 2)
+mat
+
+dimnames(mat) <- list(성별 = c('남성', '여성', '계'),
+                        흡연여부 = c('비흡연', '흡연'))
+mat
+
+addmargins(RCT)
+addmargins(prop.table(RCT), margin = c(1,2))
+
+
+## 2. 카이제곱 검정
+chi_res <- chisq.test(RCT)
+# X-squared = 331.67, df = 1, p-value < 2.2e-16
+# Yates' continuity correction (보정)
+chi_res$expected
+
+library(gmodels)
+CrossTable(RCT, chisq = T)
+
+
+## 3. 피셔의 정확검정 : 카이제곱 검정에서 기대 빈도 가정을 충족하지 않을때(기대빈도가 5 이하인 셀이 전체 셀의 20% 이상인 경우)
+
+fisher.test(RCT)
+
+RCT2 <- matrix(c(6, 2, 4, 8), ncol = 2)
+
+chisq.test(RCT2)
+
+```
+
