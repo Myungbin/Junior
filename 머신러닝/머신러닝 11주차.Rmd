@@ -1,0 +1,81 @@
+---
+title: "머신러닝 11주차 과제"
+author: "20173204 곽명빈"
+date: '2021 11 9 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(knitr)
+library(lawstat)
+```
+
+
+```{r, echo = FALSE, out.width = "75%", fig.align = "left"}
+include_graphics("문제1.png")
+```
+
+```{r}
+df <- read.csv('data.csv') # 데이터 읽기
+str(df)
+plot(df)
+
+# 선형 회귀모델
+model <- lm(손실액 ~ 거리, data = df)
+
+summary(model)
+# p-value < 0.05 이므로 위 모형은 통계적으로 유의하고 R^2이 0.9279로 높은 설명력을 가진다고 할 수 있습니다.  (모델의 설명력이 92.79%)
+
+# 회귀모형: 11945.4 + 3613.7 x 거리
+
+# 거리가 6km인 경우의 손실액
+# 11945.4 + 3513.7 x 6 = 33,027.6
+# 거리가 6km인 경우 손실액은 33,027.6이라고 할 수 있습니다.
+
+
+```
+
+```{r, echo = FALSE, out.width = "75%", fig.align = "left"}
+include_graphics("문제2.png")
+```
+
+```{r}
+library(dplyr)
+data(cats, package = "MASS")
+# cat 그룹(sex)별 평균
+cat_mean <-cats %>%
+    group_by(Sex) %>%
+    summarize(mean_Bwt = mean(Bwt),mean_Hwt = mean(Hwt))
+cat_mean
+
+fit <- glm(Sex~., data = cats, family = binomial)
+summary(fit)
+exp(coef(fit)) # 오즈비
+
+# 몸무게 오즈비
+## log(p/1-p) = 3.55*Bwt - 8.69896
+## Bwt가 1 증가할 때, Sex오즈가 3.55391 증가
+## Bwt의 오즈비는 exp(3.55) = 34.95
+### 몸무게가 1 증가할 수록 male일 가능성이 34.95배 증가한다.
+
+# 심장무게 오즈비
+## log(p/1-p) = 0.02295*Hwt - 8.69896
+## Hwt가 1증가할 때, Sex오즈가 0.02295 증가
+## Hwt의 오즈비는 exp(0.2295) = 1.02
+### 심장무게가 1 증가할 수록 male일 가능성이 1.02배 증가한다.
+
+summary(cats)
+glm.prob <- predict(fit, type = "response")
+glm.pred <- rep("F", 144) 
+glm.pred[glm.prob>0.5] = "M"
+table(glm.pred, cats$Sex)
+# 암컷일 때 암컷일 비율 31/47 = 65.96%
+# 수컷일 때 수컷일 비율 84/97 = 86.6%
+# 정확도 115/144 = 79.86%
+
+```
+
