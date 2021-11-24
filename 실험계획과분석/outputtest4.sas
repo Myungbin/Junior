@@ -1,0 +1,14 @@
+/* outputtest4.sas. */
+DATA A B;
+DO X = 1 TO 10;
+IF X ^> 5 THEN OUTPUT A;
+ELSE OUTPUT B;
+END;
+
+PROC PRINT DATA = A;
+RUN;
+
+PROC PRINT DATA = WORK.B;
+RUN;
+
+
