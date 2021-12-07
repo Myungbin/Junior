@@ -16,3 +16,25 @@ proc glm data = fatdata;
 run;
 /*lsd와 bon과 달리 lines적용 x 
 기준범주 설정안할경우 1로 계산*/
+
+/*
+Alpha	0.05
+Error Degrees of Freedom	20
+Error Mean Square	100.9
+Critical Value of Dunnett's t	2.54035
+Minimum Significant Difference	14.733
+*/
+
+
+/*
+Comparisons significant at the 0.05 level are indicated by ***.
+oil
+Comparison	Difference
+Between
+Means	Simultaneous 95% Confidence Limits	 
+3 - 2	-9.000	-23.733	5.733	 
+1 - 2	-13.000	-27.733	1.733	 
+4 - 2	-23.000	-37.733	-8.267	***
+신뢰구간안에 0이 들어가니까 차이가 없다고 할 수 있음
+4 - 2 는 신뢰구간안에 0이 안들어가니까 차이가 난다고 할 수 있음
+*/
