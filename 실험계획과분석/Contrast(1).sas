@@ -16,4 +16,10 @@ proc glm data = fatdata;
 run;
 
 /*F-value가 0.48로 귀무가설을 기각 X*/
+/*
+Contrast	DF	Contrast SS	Mean Square	F Value	Pr > F
+동물성과 식물성 비교	1	541.5000000	541.5000000	5.37	0.0313
+1번과 3번 비교	1	48.0000000	48.0000000	0.48	0.4983
 
+1번과 3번 비교는 p-value가 0.05보다 크기 때문에 귀무가설을 기각할 수 없음
+*/
